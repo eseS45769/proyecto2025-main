@@ -1,0 +1,7 @@
+import {f,id,operation,select,amount,note,check} from './fields.js';
+const data=()=>[f('sku','Código / SKU','text',{required:true}),f('nombre','Nombre de la alfombra','text',{required:true}),select('categoria_id','Categoría','categorias'),note('descripcion','Descripción y material'),amount('ancho_cm','Ancho (cm)'),amount('largo_cm','Largo (cm)'),amount('precio_actual','Precio de venta (Bs)'),f('imagen_url','Imagen','asset'),f('stock_minimo','Stock mínimo','number',{min:0,step:1,default:2})];
+export default {slug:'productos',icon:'◇',description:'Catálogo de alfombras, medidas, precios e imágenes.',operations:[
+operation('Registrar producto',[...data(),f('stock_inicial','Unidades de apertura','number',{min:0,step:1,default:0}),f('motivo_apertura','Justificación del stock inicial')],{write:true,help:'El stock inicial crea un ajuste de apertura trazable. Dejá cero si vas a recibir una compra.'}),
+operation('Actualizar producto',[id('productos','Alfombra'),...data()],{write:true,source:'productos',prefill:true,help:'El precio actualizado se aplica a documentos nuevos. Los precios históricos se conservan.'}),
+operation('Desactivar producto',[id('productos','Alfombra'),note(),check()],{write:true,source:'productos'}),
+operation('Publicar catálogo de productos',[f('productos','Alfombras activas','multiselect',{source:'productos',required:true}),note('contenido','Texto del catálogo'),f('campania','Campaña'),f('material_url','Material visual','asset')],{write:true,help:'Revisá las alfombras seleccionadas antes de preparar el catálogo para difusión.'})]};

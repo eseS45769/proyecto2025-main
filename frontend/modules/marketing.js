@@ -1,0 +1,11 @@
+import {f,id,operation,note,choices,check,dates} from './fields.js';
+const publication=()=>[
+id('publicaciones','Publicación a actualizar (vacío para preparar nueva)','publicacion_id',false),
+f('productos','Alfombras activas','multiselect',{source:'productos',required:true}),
+note('contenido','Contenido del mensaje'),f('campania','Campaña'),f('material_url','Imagen o video','asset'),f('enlace_externo','Enlace de evidencia real','url'),check('difusion_confirmada','Confirmo que la difusión se realizó en el canal real'),
+f('metrica_vistas','Vistas registradas','number',{min:0,step:1}),f('metrica_likes','Me gusta registrados','number',{min:0,step:1}),f('metrica_comentarios','Comentarios registrados','number',{min:0,step:1}),f('metrica_fuente','Fuente de las métricas (opcional)')];
+export default {slug:'marketing',icon:'◍',description:'Contenido para redes, consultas y métricas con fuente registrada.',operations:[
+operation('Publicar productos en TikTok',publication(),{write:true,source:'publicaciones',help:'Prepará contenido y material visual. Para registrar la publicación real, agregá su enlace y confirmá la difusión.'}),
+operation('Publicar productos en WhatsApp',publication(),{write:true,source:'publicaciones',help:'Prepará el mensaje y abrí Compartir en WhatsApp desde el resultado. Después del envío, actualizá esta publicación con su evidencia.'}),
+operation('Responder consultas',[id('consultas_marketing','Consulta existente (vacío para registrar nueva)','consulta_id',false),id('clientes','Cliente identificado','cliente_id',false),id('publicaciones','Publicación de origen','publicacion_id',false),f('contacto','Contacto de nueva consulta'),choices('canal','Canal',['TikTok','WhatsApp','Directo']),f('pregunta','Pregunta recibida','textarea'),note('respuesta','Respuesta preparada'),f('evidencia','Evidencia del envío'),check('envio_confirmado','Confirmo que envié la respuesta por el canal real')],{write:true,source:'consultas_marketing',help:'La respuesta queda Preparada. Solo se marca Enviada cuando confirmás su envío y registrás evidencia.'}),
+operation('Visualizar estadísticas',[...dates(),choices('canal','Canal',['TikTok','WhatsApp'],false),f('campania','Campaña')],{export:true,help:'Solo se muestran métricas registradas con fuente y fecha. Si no hay registros, se muestra Sin datos.'})]};

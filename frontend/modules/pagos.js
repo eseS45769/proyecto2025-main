@@ -1,0 +1,6 @@
+import {f,id,operation,amount,choices,docFields,note,check} from './fields.js';
+export default {slug:'pagos',icon:'◉',description:'Cobros, verificación, comprobantes internos y anulaciones.',operations:[
+operation('Registrar pago',[...docFields(),amount('monto','Monto (Bs)'),choices('metodo','Método',['Efectivo','Transferencia','QR']),f('referencia','Referencia bancaria o de caja','text',{required:true}),f('evidencia_url','Comprobante recibido','asset')],{write:true,help:'Seleccioná un pedido o una venta. El cobro permanece pendiente hasta su verificación.'}),
+operation('Verificar pago',[id('pagos','Pago pendiente'),choices('resultado','Resultado',['Verificado','Rechazado']),note('evidencia','Evidencia bancaria o de caja comprobada')],{write:true,source:'pagos',help:'Verificar reconoce un ingreso único. Repetir la verificación no vuelve a contabilizarlo.'}),
+operation('Generar comprobante',[id('pagos','Pago verificado')],{write:true,source:'pagos',receipt:true,help:'Emite o recupera el mismo recibo interno. No es factura fiscal.'}),
+operation('Anular pago',[id('pagos','Pago'),note(),check()],{write:true,source:'pagos',help:'Conserva el documento y revierte el ingreso. El inventario no cambia.'})]};

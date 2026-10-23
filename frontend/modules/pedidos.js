@@ -1,0 +1,6 @@
+import {f,id,operation,lines,choices,query,note,check} from './fields.js';
+export default {slug:'pedidos',icon:'▧',description:'Solicitudes, reservas y seguimiento de las compras de clientes.',operations:[
+operation('Registrar pedido',[id('clientes','Cliente','cliente_id'),choices('canal','Canal de origen',['TikTok','WhatsApp','Directo']),f('direccion_entrega','Dirección acordada','text',{required:true}),f('referencia_entrega','Referencia de entrega'),lines()],{write:true,help:'Se reservan todas las líneas cuando alcanza el stock. Si no alcanza, el pedido queda Pendiente de stock sin reserva parcial.'}),
+operation('Consultar pedido',[query(),id('pedidos','Detalle del pedido','id',false)],{source:'pedidos'}),
+operation('Actualizar pedido',[id('pedidos','Pedido'),f('direccion_entrega','Dirección acordada','text',{required:true}),f('referencia_entrega','Referencia de entrega'),lines()],{write:true,source:'pedidos',prefill:true,help:'Solo antes de confirmar la venta. Conserva los pagos y recalcula las reservas en una transacción.'}),
+operation('Cancelar pedido',[id('pedidos','Pedido'),note(),check()],{write:true,source:'pedidos',help:'Antes del despacho. Primero deben resolverse las ventas y pagos vigentes.'})]};

@@ -1,0 +1,16 @@
+MODULES = [
+    dict(cu=1,slug='finanzas',title='Gestionar Finanzas',p='P.5',children=['Registrar ingreso por venta','Consultar ingresos por periodo','Controlar cuentas pendientes','Generar resumen financiero']),
+    dict(cu=2,slug='reportes',title='Gestionar Reportes',p='P.6',children=['Generar reporte de ventas','Generar reporte financiero','Ver productos más vendidos','Ver clientes frecuentes']),
+    dict(cu=3,slug='administracion',title='Administrar Sistema',p='P.7',children=['Gestionar usuarios','Gestionar roles y permisos','Realizar backup','Restaurar sistema']),
+    dict(cu=4,slug='reclamos',title='Gestionar Reclamos',p='P.4',children=['Registrar reclamo','Consultar reclamo','Actualizar estado de reclamo','Cerrar reclamo']),
+    dict(cu=5,slug='pagos',title='Gestionar Pagos',p='P.3',children=['Registrar pago','Verificar pago','Generar comprobante','Anular pago']),
+    dict(cu=6,slug='pedidos',title='Gestionar Pedidos',p='P.2',children=['Registrar pedido','Consultar pedido','Actualizar pedido','Cancelar pedido']),
+    dict(cu=7,slug='ventas',title='Gestionar Ventas',p='P.1',children=['Registrar venta','Ver detalle de venta','Listar ventas','Anular venta']),
+    dict(cu=8,slug='clientes',title='Gestionar Clientes',p='P.8',children=['Registrar cliente','Consultar clientes','Actualizar datos','Registrar historial de compra']),
+    dict(cu=9,slug='inventario',title='Gestionar Inventario',p='P.9',children=['Consultar inventario','Actualizar stock','Generar alerta de stock bajo','Registrar movimiento de inventario']),
+    dict(cu=10,slug='productos',title='Gestionar Productos',p='P.10',children=['Registrar producto','Actualizar producto','Desactivar producto','Publicar catálogo de productos']),
+    dict(cu=11,slug='proveedores',title='Gestionar Proveedores',p='P.11',children=['Registrar proveedor','Actualizar proveedor','Registrar compra de productos','Consultar proveedores']),
+    dict(cu=12,slug='marketing',title='Gestionar Marketing Digital',p='P.12',children=['Publicar productos en TikTok','Publicar productos en WhatsApp','Responder consultas','Visualizar estadísticas']),
+    dict(cu=13,slug='envios',title='Gestionar Envíos',p='P.13',children=['Registrar envío','Asignar transporte','Registrar número de guía','Confirmar entrega']),
+    dict(cu=14,slug='compras',title='Gestionar Compras',p='P.14',children=['Registrar compra','Consultar compras','Actualizar stock por compra']),
+]

@@ -1,0 +1,13 @@
+export const f=(name,label,type='text',extra={})=>({name,label,type,...extra});
+export const select=(name,label,source,required=true)=>f(name,label,'select',{source,required});
+export const choices=(name,label,options,required=true)=>f(name,label,'select',{options,required});
+export const id=(source,label='Registro',name='id',required=true)=>select(name,label,source,required);
+export const note=(name='motivo',label='Motivo')=>f(name,label,'textarea',{required:true});
+export const check=(name='confirmar',label='Confirmo esta operación')=>f(name,label,'checkbox');
+export const amount=(name,label,required=true)=>f(name,label,'number',{required,min:0.01,step:'.01'});
+export const lines=(cost=false)=>f('lineas','Alfombras del documento','lines',{cost,required:true});
+export const dates=()=>[f('desde','Desde','date'),f('hasta','Hasta','date')];
+export const query=(name='q',label='Buscar')=>f(name,label);
+export const docFields=()=>[id('pedidos','Pedido','pedido_id',false),id('ventas','Venta','venta_id',false)];
+export const operation=(title,fields=[],extra={})=>({title,fields,...extra});
+export const purchase=()=>operation('Registrar compra',[id('proveedores','Proveedor','proveedor_id'),f('referencia','Documento del proveedor','text',{required:true}),f('fecha','Fecha de recepción','date'),lines(true),f('observacion','Observaciones de recepción','textarea')],{write:true,help:'Confirma recepción efectiva y entrada de stock en una sola transacción. El documento del proveedor no puede repetirse.'});
