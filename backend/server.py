@@ -15,6 +15,7 @@ from backend.catalog import MODULES
 from backend.modules import dispatch
 from backend.queries import reference,dashboard
 from backend.panels import home,panel
+from backend.storage import save_file,read_file,read_backup
 
 LOCK=threading.RLock()
 ATTEMPTS={}
@@ -79,12 +80,16 @@ class Handler(BaseHTTPRequestHandler):
         path=parsed.path
         try:
             with LOCK:
-                if method=='GET' and not path.startswith(('/api/','/archivos/')):
+                if method=='GET' and not path.startswith(('/api/','/archivos/')) and path!='/health':
                     self.static(path)
                     return
                 with connect() as c:
                     if path=='/api/login' and method=='POST':
                         self.login(c,self.json_body())
+                        return
+                    if path=='/health' and method=='GET':
+                        c.execute('SELECT 1')
+                        self.respond(dict(status='ok',database='postgresql' if getattr(c,'dialect',None)=='postgresql' else 'sqlite'))
                         return
                     u,s=self.session(c)
                     if method=='POST':
@@ -113,15 +118,12 @@ class Handler(BaseHTTPRequestHandler):
                     elif path.startswith('/api/respaldo/') and method=='GET':
                         authorize(c,u,'administracion.3')
                         r=get(c,'respaldos',path.split('/')[-1])
-                        self.respond((DATA/'respaldos'/r['ubicacion']).read_bytes(),content_type='application/zip',headers={'Content-Disposition':f'attachment; filename="saique-respaldo-{r["id"]}.zip"'})
+                        self.respond(read_backup(c,r['ubicacion']),content_type='application/zip',headers={'Content-Disposition':f'attachment; filename="saique-respaldo-{r["id"]}.zip"'})
                     elif path.startswith('/archivos/') and method=='GET':
                         name=path.split('/')[-1]
                         if not re.fullmatch(r'[a-f0-9]+\.(png|jpg|webp|pdf|mp4)',name):
                             raise Error('Archivo no encontrado.',404)
-                        target=DATA/'archivos'/name
-                        if not target.is_file():
-                            raise Error('Archivo no encontrado.',404)
-                        self.respond(target.read_bytes(),content_type=mimetypes.guess_type(name)[0] or 'application/octet-stream')
+                        self.respond(read_file(c,name),content_type=mimetypes.guess_type(name)[0] or 'application/octet-stream')
                     elif re.fullmatch(r'/api/[a-z]+/\d+',path):
                         _,_,slug,op=path.split('/')
                         value=dispatch(c,u,slug,int(op),data,method)
@@ -185,7 +187,7 @@ class Handler(BaseHTTPRequestHandler):
         if not signatures.get(extension):
             raise Error('Usá una imagen PNG/JPG/WebP, PDF o video MP4 válido.')
         name=secrets.token_hex(24)+'.'+extension
-        (DATA/'archivos'/name).write_bytes(raw)
+        save_file(c,name,raw)
         audit(c,u,'archivos','Carga de archivo',detail=name)
         self.respond(dict(url='/archivos/'+name))
 

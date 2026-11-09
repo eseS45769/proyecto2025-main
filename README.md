@@ -92,6 +92,10 @@ Usa Chrome sin ventana, revisa los 14 padres y 55 hijos y ejecuta el flujo compl
 
 ## Alcance de esta entrega
 
-El sistema está preparado para ejecución local. No se publicó en un servidor externo ni se conectó a las APIs de TikTok, WhatsApp, bancos o transportistas. Los cobros y evidencias se verifican por el operador, como establece el documento. La operación con datos reales requiere cargar y conciliar existencias y configurar las cuentas correspondientes.
+La instalación del proyecto está publicada en https://proyecto2025-main.onrender.com. La versión actual usa SQLite. Esta rama incorpora el modo PostgreSQL para Neon; el cambio de producción requiere importar y verificar primero un respaldo actual, como explica docs/MIGRACION_NUBE.md. No se conectan las APIs de TikTok, WhatsApp, bancos o transportistas. Los cobros y evidencias se verifican por el operador, como establece el documento. La operación con datos reales requiere cargar y conciliar existencias y configurar las cuentas correspondientes.
 
 Para un servidor con HTTPS, configurá `SAIQUE_SECURE_COOKIE=1`; el servicio puede escuchar otra interfaz con `--host` y otro puerto con `--port`. La copia periódica puede programarse ejecutando `python -m backend.backup_task` desde el mismo entorno y conservando las copias fuera del equipo.
+
+## Base de datos en la nube
+
+Con DATABASE_URL definido, el backend utiliza PostgreSQL mediante psycopg. Sin esa variable conserva SQLite. En PostgreSQL, los adjuntos, ZIP de respaldo y registros externos de restauración se guardan en tablas técnicas, de modo que no dependen del disco temporal del servicio. Consulta docs/MIGRACION_NUBE.md antes de aplicar el Blueprint o cambiar la conexión.

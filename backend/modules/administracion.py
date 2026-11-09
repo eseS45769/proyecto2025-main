@@ -12,6 +12,9 @@ def admin_survives(c):
         raise Error('Debe quedar al menos un administrador activo con todos los permisos de administración.')
 
 def backup(c,u,name):
+    if getattr(c, 'dialect', None) == 'postgresql':
+        from backend.cloud_backups import make_backup
+        return make_backup(c,u,name)
     # Los cambios del respaldo se guardan luego de obtener una copia consistente.
     # La conexión lectora evita ejecutar backup sobre una conexión con escritura activa.
     filename=secrets.token_hex(16)+'.zip'
@@ -46,6 +49,9 @@ def public_backup(r):
     return {k:v for k,v in r.items() if k!='ubicacion'}
 
 def restoration(c,u,d):
+    if getattr(c, 'dialect', None) == 'postgresql':
+        from backend.cloud_backups import restore_backup
+        return restore_backup(c,u,d)
     confirm(d)
     original=get(c,'respaldos',d.get('respaldo_id'))
     path=DATA/'respaldos'/original['ubicacion']

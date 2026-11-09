@@ -27,6 +27,9 @@ class Connection(sqlite3.Connection):
             self.close()
 
 def connect():
+    if os.environ.get('DATABASE_URL'):
+        from backend.database import PostgresConnection
+        return PostgresConnection(os.environ['DATABASE_URL'])
     c = sqlite3.connect(DB, timeout=20, factory=Connection)
     c.row_factory = sqlite3.Row
     c.execute('PRAGMA foreign_keys=ON')
@@ -48,7 +51,13 @@ def get(c, table, ident):
 
 def insert(c, table, data):
     fields = ','.join(data)
-    return c.execute(f'INSERT INTO {table} ({fields}) VALUES ({",".join("?" for _ in data)})', tuple(data.values())).lastrowid
+    sql = f'INSERT INTO {table} ({fields}) VALUES ({",".join("?" for _ in data)})'
+    if getattr(c, 'dialect', None) == 'postgresql':
+        if table == 'sesiones':
+            c.execute(sql, tuple(data.values()))
+            return None
+        return c.execute(sql+' RETURNING id', tuple(data.values())).fetchone()[0]
+    return c.execute(sql, tuple(data.values())).lastrowid
 
 def update(c, table, ident, data):
     c.execute(f'UPDATE {table} SET {",".join(k+"=?" for k in data)} WHERE id=?', (*data.values(), ident))
@@ -141,8 +150,12 @@ def init():
     (DATA / 'archivos').mkdir(exist_ok=True)
     (DATA / 'respaldos').mkdir(exist_ok=True)
     with connect() as c:
-        c.executescript((ROOT / 'backend/schema.sql').read_text(encoding='utf-8'))
-        c.execute('PRAGMA journal_mode=WAL')
+        cloud = getattr(c, 'dialect', None) == 'postgresql'
+        if cloud:
+            c.begin_write()
+        c.executescript((ROOT / ('backend/schema_postgresql.sql' if cloud else 'backend/schema.sql')).read_text(encoding='utf-8'))
+        if not cloud:
+            c.execute('PRAGMA journal_mode=WAL')
         if c.execute('SELECT COUNT(*) FROM roles').fetchone()[0]:
             return
         from backend.catalog import MODULES
@@ -154,6 +167,10 @@ def init():
             'Envíos': ['envios'],
             'Cliente': ['pedidos.2','pagos.1','pagos.3','reclamos.1','reclamos.2','ventas.2'],
         }
+        if cloud:
+            from backend.cloud_seed import seed
+            seed(c,MODULES,grants)
+            return
         for m in MODULES:
             for i, child in enumerate(m['children'], 1):
                 insert(c, 'permisos', dict(codigo=f'{m["slug"]}.{i}',descripcion=child))
@@ -170,6 +187,6 @@ def init():
             import secrets
             password = secrets.token_urlsafe(14)
         insert(c, 'usuarios',dict(rol_id=admin_role,nombre='Administrador',usuario='admin',password_hash=hash_password(password)))
-        print(f'Cuenta inicial: admin | Contraseña: {password}', flush=True)
+        print('Cuenta inicial creada. La contraseña se define mediante SAIQUE_ADMIN_PASSWORD.' if os.environ.get('DATABASE_URL') else f'Cuenta inicial: admin | Contraseña: {password}', flush=True)
         for name in ('Moderna','Clásica','Infantil','Minimalista','Personalizada'):
             insert(c, 'categorias',dict(nombre=name,descripcion=f'Alfombras {name.lower()}'))
