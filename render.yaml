@@ -1,0 +1,17 @@
+# Apply only after preserving the current SQLite backup and reviewing adoption.
+services:
+  - type: web
+    name: proyecto2025-main
+    runtime: python
+    plan: free
+    region: oregon
+    repo: https://github.com/eseS45769/proyecto2025-main
+    branch: main
+    buildCommand: pip install -r requirements.txt && python -m compileall -q backend
+    startCommand: python -u -m backend.server --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SAIQUE_SECURE_COOKIE
+        value: "1"
