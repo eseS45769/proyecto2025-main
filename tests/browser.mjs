@@ -27,6 +27,17 @@ try{
   const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text+' '+(r.exceptionDetails.exception?.description||''));return r.result.value;};
   await send('Runtime.enable');await send('Page.enable');await send('Log.enable');
   await until(()=>evaluate('Boolean(document.querySelector("#login-form"))'),'login');
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await delay(300);
+  const loginShot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});await writeFile(path.join(output,'login-premium.png'),Buffer.from(loginShot.data,'base64'));
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'),true,'Login móvil sin desbordamiento');
+  await evaluate('document.querySelector(".password-toggle").click()');
+  assert.equal(await evaluate('document.querySelector("[name=password]").type'),'text');
+  await evaluate('document.querySelector(".password-toggle").click()');
+  assert.equal(await evaluate('document.querySelector("[name=password]").type'),'password');
+  const loginMobile=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});await writeFile(path.join(output,'login-mobile.png'),Buffer.from(loginMobile.data,'base64'));
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await evaluate(`document.querySelector('[name=usuario]').value='admin';document.querySelector('[name=password]').value='BrowserPruebas2026!';document.querySelector('#login-form').requestSubmit();`);
   await until(()=>evaluate('Boolean(document.querySelector(".module-grid"))'),'inicio');
   assert.equal(await evaluate('document.querySelectorAll(".module-card").length'),14);
@@ -54,7 +65,7 @@ try{
   await navigate('administracion',2);await fill({rol_id:'2'});assert.ok(await evaluate(`document.querySelectorAll('[name=permisos]:checked').length>0`));
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await navigate('administracion');
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.sidebar')).backgroundColor`),'rgb(243, 236, 227)');
+  assert.equal(await evaluate(`Boolean(document.querySelector('.sidebar .nav-link.active'))`),true);
   assert.equal(await evaluate(`Boolean(document.querySelector('a[href="#/administracion/1?nuevo=1"]'))`),true);
   const adminShot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});await writeFile(path.join(output,'administracion-diseno.png'),Buffer.from(adminShot.data,'base64'));
   await navigate('clientes');await evaluate(`document.querySelector('[data-inspect="1"]').click()`);

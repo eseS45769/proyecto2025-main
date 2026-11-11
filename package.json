@@ -1,0 +1,9 @@
+{
+  "name": "saique-gestion",
+  "private": true,
+  "scripts": {
+    "dev": "python scripts/preview.py",
+    "test": "python -m unittest discover -s tests -v",
+    "test:browser": "node tests/browser.mjs"
+  }
+}
