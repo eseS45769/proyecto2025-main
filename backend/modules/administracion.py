@@ -87,7 +87,7 @@ def restoration(c,u,d):
             c.backup(previous)
             previous.close()
             try:
-                restored.backup(c)
+                restore_database(restored,c)
                 for f in (DATA/'archivos').iterdir():
                     if f.is_file():
                         f.unlink()
@@ -115,7 +115,7 @@ def restoration(c,u,d):
             except Exception:
                 c.rollback()
                 previous=sqlite3.connect(prior)
-                previous.backup(c)
+                restore_database(previous,c)
                 previous.close()
                 for f in (DATA/'archivos').iterdir():
                     if f.is_file():
@@ -181,3 +181,11 @@ def handle(c,u,op,d):
         confirm(d)
         return backup(c,u,text(d,'nombre',maximum=120))
     return restoration(c,u,d)
+
+
+def restore_database(source, target):
+    if hasattr(target, "raw"):
+        from backend.postgres import restore_into
+        restore_into(source, target)
+    else:
+        source.backup(target)
