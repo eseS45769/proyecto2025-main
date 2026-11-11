@@ -27,6 +27,9 @@ class Connection(sqlite3.Connection):
             self.close()
 
 def connect():
+    if os.environ.get("DATABASE_URL"):
+        from backend.postgres import Connection as PostgresConnection
+        return PostgresConnection(os.environ["DATABASE_URL"])
     c = sqlite3.connect(DB, timeout=20, factory=Connection)
     c.row_factory = sqlite3.Row
     c.execute('PRAGMA foreign_keys=ON')
@@ -48,7 +51,11 @@ def get(c, table, ident):
 
 def insert(c, table, data):
     fields = ','.join(data)
-    return c.execute(f'INSERT INTO {table} ({fields}) VALUES ({",".join("?" for _ in data)})', tuple(data.values())).lastrowid
+    sql = f'INSERT INTO {table} ({fields}) VALUES ({",".join("?" for _ in data)})'
+    if hasattr(c, 'raw'):
+        cursor = c.execute(sql + (' RETURNING id' if table != 'sesiones' else ''), tuple(data.values()))
+        return cursor.fetchone()[0] if table != 'sesiones' else None
+    return c.execute(sql, tuple(data.values())).lastrowid
 
 def update(c, table, ident, data):
     c.execute(f'UPDATE {table} SET {",".join(k+"=?" for k in data)} WHERE id=?', (*data.values(), ident))
@@ -102,8 +109,8 @@ def url(d, key, required=False):
     return v
 
 def hash_password(password):
-    if len(password) < 10:
-        raise Error('La contraseña debe tener al menos 10 caracteres.')
+    if len(password) < 9:
+        raise Error('La contraseña debe tener al menos 9 caracteres.')
     salt = os.urandom(16).hex()
     digest = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 250000).hex()
     return f'pbkdf2_sha256$250000${salt}${digest}'
@@ -141,7 +148,8 @@ def init():
     (DATA / 'archivos').mkdir(exist_ok=True)
     (DATA / 'respaldos').mkdir(exist_ok=True)
     with connect() as c:
-        c.executescript((ROOT / 'backend/schema.sql').read_text(encoding='utf-8'))
+        schema = 'schema_postgres.sql' if hasattr(c, 'raw') else 'schema.sql'
+        c.executescript((ROOT / 'backend' / schema).read_text(encoding='utf-8'))
         c.execute('PRAGMA journal_mode=WAL')
         if c.execute('SELECT COUNT(*) FROM roles').fetchone()[0]:
             return
