@@ -12,7 +12,7 @@ class Row(dict):
         return list(self.values())[key] if isinstance(key, int) else super().__getitem__(key)
 
 def row_factory(cursor):
-    names = [col.name for col in cursor.description]
+    names = [col.name for col in (cursor.description or [])]
     def make(values):
         values = [int(v) if isinstance(v, Decimal) and v == v.to_integral_value() else float(v) if isinstance(v, Decimal) else v for v in values]
         return Row(zip(names, values))

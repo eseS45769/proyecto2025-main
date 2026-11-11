@@ -12,3 +12,7 @@ class PostgresAdapter(unittest.TestCase):
         self.assertEqual(row[0], 12300)
         self.assertEqual(dict(row), {'total':12300})
         self.assertIsInstance(row['total'], int)
+
+    def test_statement_without_result_columns(self):
+        make = row_factory(SimpleNamespace(description=None))
+        self.assertEqual(make([]), {})
