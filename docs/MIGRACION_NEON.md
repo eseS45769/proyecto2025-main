@@ -6,8 +6,8 @@ No incluye Aladín, animaciones ni estilos de los rediseños posteriores.
 ## Estado
 
 - Esquema PostgreSQL creado y validado en `saique-alfombras`, base `saique`.
-- Adaptador de PostgreSQL, importador y contraseña de nueve caracteres implementados.
-- Pruebas locales: 25 pasan con SQLite y pruebas unitarias del adaptador.
+- Adaptador de PostgreSQL e importador que conserva las contraseñas existentes.
+- Pruebas locales: 24 pasan con SQLite y pruebas unitarias del adaptador.
 - Pendiente: respaldo del servicio Render, importación real, pruebas completas con PostgreSQL y despliegue.
 - No se han cambiado la contraseña ni la base de datos del servicio activo.
 
@@ -16,8 +16,7 @@ No incluye Aladín, animaciones ni estilos de los rediseños posteriores.
 1. Obtener un ZIP verificado desde Administración → Realizar backup y descargarlo.
    Conservar también los archivos adjuntos y respaldos previos fuera del disco efímero de Render.
 2. Instalar `python -m pip install -r requirements.txt`.
-3. Configurar `DATABASE_URL` con la URL directa de Neon (sin `-pooler`) y
-   `SAIQUE_ADMIN_PASSWORD` con la clave solicitada, fuera del repositorio.
+3. Configurar `DATABASE_URL` con la URL directa de Neon (sin `-pooler`) fuera del repositorio.
 4. Extraer `database.sqlite3` del respaldo y ejecutar:
 
    ```sh
@@ -25,7 +24,7 @@ No incluye Aladín, animaciones ni estilos de los rediseños posteriores.
    ```
 
    El importador exige destino vacío, verifica integridad y conteos, conserva IDs,
-   reajusta secuencias y aplica el cambio de contraseña en la misma transacción.
+   reajusta secuencias y conserva las contraseñas en la misma transacción.
    Ante un error revierte la importación; no modifica SQLite de origen.
 5. Configurar el build de Render: `pip install -r requirements.txt && python -m compileall -q backend`.
    Conservar el comando de arranque existente. Configurar la URL pooled en `DATABASE_URL` y

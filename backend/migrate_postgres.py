@@ -1,14 +1,14 @@
 """Import a verified SQLite database into an EMPTY PostgreSQL database.
 
-DATABASE_URL must be a direct PostgreSQL URL. Optional SAIQUE_ADMIN_PASSWORD
-changes admin's password in the same transaction and revokes its sessions.
+DATABASE_URL must be a direct PostgreSQL URL. Existing password hashes
+and sessions are copied unchanged; this command never resets credentials.
 Run: python -m backend.migrate_postgres /path/to/database.sqlite3
 """
 import argparse
 import os
 import sqlite3
 from pathlib import Path
-from backend.core import ROOT, hash_password
+from backend.core import ROOT
 from backend.postgres import Connection, import_sqlite, tables
 
 
@@ -30,13 +30,6 @@ def main():
                 actual = target.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
                 if actual != expected:
                     raise RuntimeError(f'Conteo incorrecto en {table}; transacción cancelada.')
-            password = os.environ.get('SAIQUE_ADMIN_PASSWORD')
-            if password:
-                admin = target.execute("SELECT id FROM usuarios WHERE usuario='admin'").fetchone()
-                if not admin:
-                    raise RuntimeError('No existe admin; transacción cancelada.')
-                target.execute('UPDATE usuarios SET password_hash=? WHERE id=?', (hash_password(password), admin['id']))
-                target.execute('DELETE FROM sesiones WHERE usuario_id=?', (admin['id'],))
     print('Importación confirmada: tablas verificadas; origen conservado.')
 
 if __name__ == '__main__':

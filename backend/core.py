@@ -109,8 +109,8 @@ def url(d, key, required=False):
     return v
 
 def hash_password(password):
-    if len(password) < 9:
-        raise Error('La contraseña debe tener al menos 9 caracteres.')
+    if len(password) < 10:
+        raise Error('La contraseña debe tener al menos 10 caracteres.')
     salt = os.urandom(16).hex()
     digest = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 250000).hex()
     return f'pbkdf2_sha256$250000${salt}${digest}'

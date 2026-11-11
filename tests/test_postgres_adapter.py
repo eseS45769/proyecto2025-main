@@ -2,7 +2,6 @@ import unittest
 from decimal import Decimal
 from types import SimpleNamespace
 from backend.postgres import parameters, row_factory
-from backend.core import hash_password, check_password
 
 class PostgresAdapter(unittest.TestCase):
     def test_literals_are_not_parameters(self):
@@ -13,9 +12,3 @@ class PostgresAdapter(unittest.TestCase):
         self.assertEqual(row[0], 12300)
         self.assertEqual(dict(row), {'total':12300})
         self.assertIsInstance(row['total'], int)
-    def test_nine_character_password_is_hashed(self):
-        password = 'TestNine9'
-        encoded = hash_password(password)
-        self.assertNotIn(password, encoded)
-        self.assertTrue(check_password(password, encoded))
-        self.assertFalse(check_password('different', encoded))
