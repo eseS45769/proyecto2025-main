@@ -1,0 +1,69 @@
+:root {
+  --ink: #262820;
+  --paper: #f7f4ec;
+  --accent: #283e30;
+  --motion-out: cubic-bezier(.16, 1, .3, 1);
+  --motion-quick: 160ms;
+}
+.login { background: var(--paper); }
+.login .login-story {
+  background: #22372c;
+  color: #f8f2df;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+.login .login-story::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 90% 100%, #51634a, transparent 64%);
+  z-index: -1;
+  pointer-events: none;
+}
+.login .login-story h1 {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -.055em;
+  line-height: .99;
+}
+.login .login-story p, .login .login-story .location { color: #dce0d0; }
+.login .login-story .eyebrow { color: #ded4b8; }
+.login .login-form { color: var(--ink); background: var(--paper); }
+.login .login-box { animation: login-appear 220ms var(--motion-out) both; }
+.login .login-box h2 { letter-spacing: -.035em; }
+.login input {
+  background: #fffefa;
+  border-color: #d6d0c1;
+  transition: border-color var(--motion-quick), box-shadow var(--motion-quick);
+}
+.login input:focus { border-color: #657e66; box-shadow: 0 0 0 3px #657e6626; }
+.login .primary { background: var(--accent); color: #fff; }
+.login .primary, .workspace :is(button, .button, .nav-link) {
+  transition: background-color var(--motion-quick), border-color var(--motion-quick),
+    color var(--motion-quick), transform var(--motion-quick) var(--motion-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .login .primary:hover { background: #344f3d; }
+  .workspace a.module-card:hover { border-color: #9ba996; }
+}
+.login .primary:active:not(:disabled),
+.workspace :is(button, .button):active:not(:disabled) { transform: scale(.97); }
+:is(.login, .workspace) :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #607c5e;
+  outline-offset: 3px;
+}
+.workspace .nav-link.active { box-shadow: inset 2px 0 var(--accent); }
+.workspace .nav-link { overflow-wrap: anywhere; }
+@keyframes login-appear {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login .login-box { animation: none; }
+  .login input, .login .primary, .workspace :is(button, .button, .nav-link) {
+    transition: none;
+  }
+  .login .primary:active:not(:disabled),
+  .workspace :is(button, .button):active:not(:disabled) { transform: none; }
+}
