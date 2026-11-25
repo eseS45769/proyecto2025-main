@@ -35,12 +35,36 @@ function toast(message,error=false){const el=document.querySelector('#toast');el
 function permitted(slug,op){return session?.permisos.includes(`${slug}.${op}`);}
 function goto(slug,op){location.hash=slug?(op?`#/${slug}/${op}`:`#/${slug}`):'#/';}
 function login(){
-  app.innerHTML=`<main class="login"><section class="login-story"><a class="brand" href="#/"><span class="brand-mark">S</span><span>SAIQUE<small>TIENDA DE ALFOMBRAS</small></span></a><div><span class="eyebrow">GESTIÓN DEL NEGOCIO</span><h1>Cada alfombra.<br>Cada pedido.<br>Todo conectado.</h1><p>Del primer contacto a la entrega, mantené tus operaciones en un solo lugar.</p><div class="woven" aria-hidden="true"></div></div><span class="location">Tarija, Bolivia · Sistema de gestión</span></section><section class="login-form"><div class="login-box"><span class="eyebrow">BIENVENIDO</span><h2>Ingresá a tu cuenta</h2><p class="muted">Usá el usuario que te asignó el administrador.</p><form id="login-form"><label>Usuario<input name="usuario" autocomplete="username" required autofocus></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><p class="form-error" role="alert"></p><button class="primary" type="submit">Iniciar sesión</button></form><p class="login-foot">Tu acceso depende de los permisos de tu rol.</p></div></section></main>`;
+  app.innerHTML = `<main class="login access">
+    <div class="access-scene" aria-hidden="true"></div>
+    <div class="access-light" aria-hidden="true"></div>
+    <header class="access-brand">SAIQUE<small>LUXURY RUGS</small></header>
+    <section class="access-panel" aria-labelledby="access-title">
+      <h1 id="access-title">Cada hilo abre<br>un mundo.</h1>
+      <form id="login-form">
+        <label>Usuario<input name="usuario" autocomplete="username" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+        <p class="form-error" role="alert"></p>
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+    </section>
+  </main>`;
+  const access = app.querySelector('.access');
+  if (matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+    access.addEventListener('pointermove', event => {
+      access.style.setProperty('--scene-x', `${(event.clientX / access.clientWidth - .5) * 28}px`);
+      access.style.setProperty('--scene-y', `${(event.clientY / access.clientHeight - .5) * 20}px`);
+    });
+    access.addEventListener('pointerleave', () => {
+      access.style.removeProperty('--scene-x');
+      access.style.removeProperty('--scene-y');
+    });
+  }
   document.querySelector('#login-form').addEventListener('submit',async ev=>{
     ev.preventDefault();const form=ev.currentTarget;const button=form.querySelector('button');button.disabled=true;button.textContent='Ingresando…';
     try {await api('/api/login',Object.fromEntries(new FormData(form)));await boot();}
     catch(err){form.querySelector('.form-error').textContent=err.message;}
-    finally{button.disabled=false;button.textContent='Iniciar sesión';}
+    finally{button.disabled=false;button.textContent='Entrar';}
   });
 }
 function shell(){
